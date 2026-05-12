@@ -57,9 +57,54 @@ export async function POST(request: NextRequest) {
     const report = completion.choices[0]?.message?.content?.trim() || '日報生成に失敗しました。';
     console.log('Generated report preview:', report.slice(0, 200));
 
+    // LINE通知を送信（環境変数が設定されている場合）
+    if (process.env.LINE_CHANNEL_ACCESS_TOKEN && process.env.LINE_USER_ID) {
+      try {
+        console.log('Sending LINE notification...');
+        const lineMessage = await sendLineNotification(report);
+        console.log('LINE notification sent successfully');
+      } catch (lineError) {
+        console.error('Error sending LINE notification:', lineError);
+        // LINE通知エラーは無視して、日報は返す
+      }
+    }
+
     return NextResponse.json({ report });
   } catch (error) {
     console.error('Error generating report:', error);
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
   }
+}
+
+async function sendLineNotification(report: string) {
+  const channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  const userId = process.env.LINE_USER_ID;
+
+  if (!channelAccessToken || !userId) {
+    throw new Error('LINE_CHANNEL_ACCESS_TOKEN or LINE_USER_ID is not set');
+  }
+
+  const response = await fetch('https://api.line.biz/v1/bot/message/push', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${channelAccessToken}`,
+    },
+    body: JSON.stringify({
+      to: userId,
+      messages: [
+        {
+          type: 'text',
+          text: `📋 今日の日報が生成されました\n\n${report}`,
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`LINE API error: ${response.status} ${error}`);
+  }
+
+  return response.json();
 }
