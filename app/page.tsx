@@ -10,20 +10,43 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    console.log('Submitting activities:', activities);
+
     try {
-      const response = await fetch('http://localhost:8000/generate-report', {
+      const response = await fetch('/api/generate-report', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ activities }),
       });
-      const data = await response.json();
-      setReport(data.report);
+
+      console.log('API response status:', response.status);
+      console.log('API response headers:', Array.from(response.headers.entries()));
+
+      let data: any;
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        console.warn('Response is not JSON:', text);
+        data = { error: text || '非JSONレスポンスを受信しました' };
+      }
+
+      console.log('API response body:', data);
+
+      if (!response.ok) {
+        console.error('API returned an error:', data);
+        alert(`エラーが発生しました: ${data.error || response.statusText}`);
+      } else {
+        setReport(data.report);
+      }
     } catch (error) {
-      console.error('Error:', error);
-      alert('エラーが発生しました。');
+      console.error('Fetch error:', error);
+      alert('通信エラーが発生しました。コンソールを確認してください。');
     }
+
     setLoading(false);
   };
 
