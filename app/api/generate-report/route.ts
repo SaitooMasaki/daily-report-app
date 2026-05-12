@@ -84,7 +84,7 @@ async function sendLineNotification(report: string) {
     throw new Error('LINE_CHANNEL_ACCESS_TOKEN or LINE_USER_ID is not set');
   }
 
-  const response = await fetch('https://api.line.biz/v1/bot/message/push', {
+  const response = await fetch('https://api.line.me/v2/bot/message/push', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
