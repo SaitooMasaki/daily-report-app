@@ -59,7 +59,7 @@ async def generate_report(request: ReportRequest):
                 {"role": "system", "content": "あなたは優秀なアシスタントです。"},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=500
+            max_tokens=1500
         )
         
         report = response.choices[0].message.content.strip()

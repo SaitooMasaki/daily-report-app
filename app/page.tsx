@@ -5,6 +5,7 @@ import { useState } from 'react';
 export default function Home() {
   const [activities, setActivities] = useState('');
   const [report, setReport] = useState('');
+  const [editedReport, setEditedReport] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,6 +42,7 @@ export default function Home() {
         alert(`エラーが発生しました: ${data.error || response.statusText}`);
       } else {
         setReport(data.report);
+        setEditedReport(data.report);
       }
     } catch (error) {
       console.error('Fetch error:', error);
@@ -51,8 +53,8 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <h1 className="text-2xl font-bold mb-6 text-center">AI日報生成アプリ</h1>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -79,9 +81,21 @@ export default function Home() {
         {report && (
           <div className="mt-6">
             <h2 className="text-lg font-semibold mb-2">生成された日報</h2>
-            <div className="bg-gray-50 p-4 rounded-md whitespace-pre-wrap">
-              {report}
-            </div>
+            <textarea
+              value={editedReport}
+              onChange={(e) => setEditedReport(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans text-sm"
+              rows={12}
+            />
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(editedReport);
+                alert('日報をコピーしました');
+              }}
+              className="mt-3 w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600"
+            >
+              コピー
+            </button>
           </div>
         )}
       </div>
