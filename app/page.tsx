@@ -174,7 +174,7 @@ export default function Home() {
               onClick={() => setPreviewOpen((v) => !v)}
               className="text-sm px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50"
             >
-              選択中のテンプレート: {selectedTemplate.name} ▾
+              テンプレートを表示 ▾
             </button>
             {previewOpen && (
               <>
