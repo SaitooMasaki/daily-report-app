@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const json = await request.json();
     console.log('Incoming request body:', json);
 
-    const { activities } = json;
+    const { activities, format } = json;
 
     if (!activities) {
       console.warn('Missing activities in request body');
@@ -31,16 +31,19 @@ export async function POST(request: NextRequest) {
       day: 'numeric',
     });
 
+    // テンプレート未指定時はデフォルトフォーマットを使用
+    const reportFormat = typeof format === 'string' && format.trim() ? format : `業務内容: (活動内容を簡潔にまとめる)
+成果: (達成したことや得られた結果)
+課題: (問題点や改善点)
+今後の予定: (次に取り組むこと)`;
+
     // OpenAIで日報生成
     const prompt = `以下の活動内容を基に、ビジネス日報を作成してください。
 自然で実用的、報告に適した形式で書いてください。
 
 【日報フォーマット】
 日付: ${today}
-業務内容: (活動内容を簡潔にまとめる)
-成果: (達成したことや得られた結果)
-課題: (問題点や改善点)
-今後の予定: (次に取り組むこと)
+${reportFormat}
 
 活動内容: ${activities}`;
 
